@@ -3,7 +3,7 @@ const ctx = canvas.getContext("2d");
 const CANVAS_WIDTH = (canvas.width = 800);
 const CANVAS_HEIGHT = (canvas.height = 700);
 
-let gameSpeed = 15;
+let gameSpeed = 5;
 
 const backgoundLayer1 = new Image();
 backgoundLayer1.src = "./backgroundLayers/layer-1.png";
@@ -16,18 +16,59 @@ backgoundLayer4.src = "./backgroundLayers/layer-4.png";
 const backgoundLayer5 = new Image();
 backgoundLayer5.src = "./backgroundLayers/layer-5.png";
 
-const IMG_WIDTH = 2400;
-let x = 0;
-let x2 = IMG_WIDTH;
+const slider = document.getElementById("slider");
+slider.value = gameSpeed;
+const showGameSpeed = document.getElementById("showGameSpeed");
+showGameSpeed.innerHTML = gameSpeed;
+slider.addEventListener("change", function (e) {
+  gameSpeed = e.target.value;
+  showGameSpeed.innerHTML = gameSpeed;
+});
 
+class Layer {
+  constructor(image, speedModifier) {
+    this.x = 0;
+    this.y = 0;
+    this.width = 2400;
+    this.height = 700;
+    this.x2 = this.width;
+    this.image = image;
+    this.speedModifier = speedModifier;
+    this.speed = gameSpeed * this.speedModifier;
+  }
+  update() {
+    this.speed = gameSpeed * this.speedModifier;
+    if (this.x < -this.width) this.x = this.width + this.x2 - this.speed;
+    if (this.x2 < -this.width) this.x2 = this.width + this.x - this.speed;
+    this.x = Math.floor(this.x - this.speed);
+    this.x2 = Math.floor(this.x2 - this.speed);
+  }
+  draw() {
+    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+    ctx.drawImage(this.image, this.x2, this.y, this.width, this.height);
+  }
+}
+
+// const layer1 = new Layer(backgoundLayer4, 0.5);
+// const layer2 = new Layer(backgoundLayer4, 0.7);
+// const layer3 = new Layer(backgoundLayer4, 0.8);
+// const layer4 = new Layer(backgoundLayer4, 0.9);
+// const layer5 = new Layer(backgoundLayer4, 1);
+
+const gameObjects = [
+  new Layer(backgoundLayer1, 0.2),
+  new Layer(backgoundLayer2, 0.4),
+  new Layer(backgoundLayer3, 0.6),
+  new Layer(backgoundLayer4, 0.8),
+  new Layer(backgoundLayer5, 1),
+];
 function animate() {
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  ctx.drawImage(backgoundLayer2, x, 0);
-  ctx.drawImage(backgoundLayer2, x2, 0);
-  if (x < -IMG_WIDTH) x = IMG_WIDTH + x2 - gameSpeed;
-  else x -= gameSpeed;
-  if (x2 < -IMG_WIDTH) x2 = IMG_WIDTH + x - gameSpeed;
-  else x2 -= gameSpeed;
+  gameObjects.forEach((element) => {
+    element.update();
+    element.draw();
+  });
+
   requestAnimationFrame(animate);
 }
 animate();
